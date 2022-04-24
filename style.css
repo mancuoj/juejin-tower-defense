@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Orbitron:wght@500&display=swap');
+
 body {
   background: black;
 }
@@ -10,4 +12,5 @@ body {
   transform: translate(-50%, -50%);
   width: 900px;
   height: 600px;
+  font-family: 'Orbitron', 'Ma Shan Zheng', sans-serif;
 }

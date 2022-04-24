@@ -8,7 +8,6 @@ canvas.height = 600
 
 const cellSize = 100
 const cellGap = 3
-const winningScore = 1000
 
 const gameGrid = []
 const defenders = []
@@ -16,7 +15,10 @@ const projectiles = []
 const enemies = []
 const enemyPositions = []
 const resources = []
+const messages = []
 
+// const winningScore = 1000
+const winningScore = 20
 let numOfResources = 300
 let score = 0
 let frame = 0
@@ -81,6 +83,47 @@ function handleGrid() {
   }
 }
 
+// 提示信息
+class Message {
+  constructor(value, x, y, size, color) {
+    this.value = value
+    this.x = x
+    this.y = y
+    this.size = size
+    this.color = color
+    this.life = 0
+    this.opacity = 1
+  }
+
+  update() {
+    this.y -= 0.3
+    this.life++
+    if (this.opacity > 0.01) this.opacity -= 0.01
+  }
+
+  draw() {
+    ctx.globalAlpha = this.opacity
+    ctx.fillStyle = this.color
+    ctx.font = `${this.size}px Ma Shan Zheng`
+    ctx.fillText(this.value, this.x, this.y)
+
+    // 恢复画笔
+    ctx.globalAlpha = 1
+  }
+}
+
+function handleMessages() {
+  for (let i = 0; i < messages.length; i++) {
+    messages[i].update()
+    messages[i].draw()
+
+    if (messages[i].life > 50) {
+      messages.splice(i, 1)
+      i--
+    }
+  }
+}
+
 // 植物
 class Defender {
   constructor(x, y) {
@@ -111,8 +154,8 @@ class Defender {
     ctx.strokeRect(this.x, this.y, this.width, this.height)
 
     ctx.fillStyle = 'black'
-    ctx.font = '25px Arial'
-    ctx.fillText(Math.floor(this.health), this.x + 28, this.y + 55)
+    ctx.font = '24px Orbitron'
+    ctx.fillText(Math.floor(this.health), this.x + 25, this.y + 55)
   }
 }
 
@@ -123,6 +166,7 @@ canvas.addEventListener('click', () => {
 
   for (let i = 0; i < defenders.length; i++) {
     if (defenders[i].x === gridPositionX && defenders[i].y === gridPositionY) {
+      messages.push(new Message('不能重叠', mouse.x, mouse.y, 30, 'black'))
       return
     }
   }
@@ -131,6 +175,8 @@ canvas.addEventListener('click', () => {
   if (numOfResources >= defenderCost) {
     numOfResources -= defenderCost
     defenders.push(new Defender(gridPositionX, gridPositionY))
+  } else {
+    messages.push(new Message('资源不足', mouse.x, mouse.y, 30, 'black'))
   }
 })
 
@@ -168,7 +214,7 @@ class Projectile {
     this.width = 10
     this.height = 10
     this.power = 20
-    this.speed = 5
+    this.speed = 3
   }
 
   update() {
@@ -210,7 +256,8 @@ class Enemy {
     this.y = verticalPosition
     this.width = cellSize - cellGap * 2
     this.height = cellSize - cellGap * 2
-    this.speed = 0.4
+    // this.speed = 0.4
+    this.speed = 2
     this.maxSpeed = this.speed
     this.health = 100
     this.maxHealth = this.health
@@ -231,8 +278,8 @@ class Enemy {
     ctx.strokeRect(this.x, this.y, this.width, this.height)
 
     ctx.fillStyle = 'black'
-    ctx.font = '25px Arial'
-    ctx.fillText(Math.floor(this.health), this.x + 28, this.y + 55)
+    ctx.font = '24px Orbitron'
+    ctx.fillText(Math.floor(this.health), this.x + 25, this.y + 55)
   }
 }
 
@@ -241,13 +288,14 @@ function handleEnemies() {
     enemies[i].update()
     enemies[i].draw()
 
-    if (enemies[i].x < 0) {
+    if (enemies[i].x <= 0) {
       gameOver = true;
     }
 
     if (enemies[i].health <= 0) {
       let initRainedResources = enemies[i].maxHealth / 5
       numOfResources += initRainedResources
+      messages.push(new Message(`+${initRainedResources}`, 160, 35, 30, 'yellow'))
       score += initRainedResources
       enemyPositions.splice(enemyPositions.indexOf(enemies[i].y), 1)
       enemies.splice(i, 1)
@@ -279,7 +327,7 @@ class Resource {
     ctx.fillRect(this.x, this.y, this.width, this.height)
 
     ctx.fillStyle = 'black'
-    ctx.font = '25px Arial'
+    ctx.font = '20px Orbitron'
     ctx.fillText(this.amount, this.x + 12, this.y + 30)
   }
 }
@@ -293,6 +341,7 @@ function handleResources() {
     resources[i].draw()
     if (resources[i] && mouse.x && mouse.y && collision(resources[i], mouse)) {
       numOfResources += resources[i].amount
+      messages.push(new Message(`+${resources[i].amount}`, 160, 35, 30, 'yellow'))
       resources.splice(i, 1)
       i--
     }
@@ -302,21 +351,25 @@ function handleResources() {
 // 工具函数
 function handleGameStatus() {
   ctx.fillStyle = 'yellow'
-  ctx.font = '30px Arial'
-  ctx.fillText(`☀️: ${numOfResources}`, 20, 55)
+  ctx.font = '30px Orbitron'
+  ctx.fillText(`☀️: ${numOfResources}`, 20, 35)
+
+  ctx.fillStyle = 'yellow'
+  ctx.font = '30px Orbitron'
+  ctx.fillText(`🉐: ${score}`, 20, 75)
 
   if (gameOver) {
-    ctx.fillStyle = 'black'
-    ctx.font = '200px Arial'
-    ctx.fillText('菜！', 350, 350)
+    ctx.fillStyle = 'red'
+    ctx.font = '300px Ma Shan Zheng'
+    ctx.fillText('寄!', 280, 370)
   }
 
   if (score >= winningScore && enemies.length === 0) {
     ctx.fillStyle = 'black'
-    ctx.font = '120px Arial'
-    ctx.fillText('赢！', 350, 350)
-    ctx.font = '70px Arial'
-    ctx.fillText(`分数：${score}`, 280, 450)
+    ctx.font = '300px Ma Shan Zheng'
+    ctx.fillText('赢!', 280, 360)
+    ctx.font = '120px Ma Shan Zheng'
+    ctx.fillText(`得分: ${score}`, 250, 520)
   }
 }
 
@@ -337,7 +390,7 @@ function collision(first, second) {
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-  ctx.fillStyle = 'blue'
+  ctx.fillStyle = 'slateblue'
   ctx.fillRect(0, 0, controlsBar.width, controlsBar.height)
 
   handleGrid()
@@ -346,6 +399,7 @@ function animate() {
   handleProjectiles()
   handleEnemies()
   handleGameStatus()
+  handleMessages()
 
   frame++
   if (!gameOver) requestAnimationFrame(animate)
