@@ -17,8 +17,19 @@ const enemyPositions = []
 const resources = []
 const messages = []
 
-// const winningScore = 1000
-const winningScore = 20
+// 需要更多美术素材
+const enemyTypes = []
+const enemy1 = new Image()
+enemy1.src = 'zombie.png'
+enemyTypes.push(enemy1)
+
+const defenderTypes = []
+const defender1 = new Image()
+defender1.src = 'plant.png'
+defenderTypes.push(defender1)
+
+const winningScore = 1000
+// const winningScore = 20
 let numOfResources = 300
 let score = 0
 let frame = 0
@@ -134,28 +145,44 @@ class Defender {
     this.health = 100
     this.projectiles = []
     this.shooting = false
-    this.timer = 0
+    this.shootNow = false
+    this.shootRate = 50  // 越小越快
+
+    this.defenderType = defenderTypes[0]
+    this.frameX = 0
+    this.frameY = 0
+    this.minFrame = 0
+    this.maxFrame = 1
+    this.spriteWidth = 167
+    this.spriteHeight = 243
   }
 
   update() {
-    if (this.shooting) {
-      this.timer++;
-      if (this.timer % 100 === 0) {
-        projectiles.push(new Projectile(this.x + 100, this.y + 45))
-      }
-    } else {
-      this.timer = 0
+    if (frame % this.shootRate === 0) {
+      if (this.frameX < this.maxFrame) this.frameX++
+      else this.frameX = this.minFrame
+
+      // 张嘴的时候射击
+      if (this.frameX === 1) this.shootNow = true
+    }
+
+    if (this.shooting && this.shootNow) {
+      projectiles.push(new Projectile(this.x + 100, this.y + 45))
+      this.shootNow = false
     }
   }
 
   draw() {
-    ctx.strokeStyle = 'green'
-    ctx.lineWidth = 3
-    ctx.strokeRect(this.x, this.y, this.width, this.height)
+    // ctx.strokeStyle = 'green'
+    // ctx.lineWidth = 3
+    // ctx.strokeRect(this.x, this.y, this.width, this.height)
 
-    ctx.fillStyle = 'black'
-    ctx.font = '24px Orbitron'
-    ctx.fillText(Math.floor(this.health), this.x + 25, this.y + 55)
+    // ctx.fillStyle = 'black'
+    // ctx.font = '24px Orbitron'
+    // ctx.fillText(Math.floor(this.health), this.x + 25, this.y + 55)
+
+    ctx.drawImage(this.defenderType, this.frameX * this.spriteWidth, 0,
+      this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height)
   }
 }
 
@@ -166,7 +193,7 @@ canvas.addEventListener('click', () => {
 
   for (let i = 0; i < defenders.length; i++) {
     if (defenders[i].x === gridPositionX && defenders[i].y === gridPositionY) {
-      messages.push(new Message('不能重叠', mouse.x, mouse.y, 30, 'black'))
+      messages.push(new Message('不能重叠', mouse.x, mouse.y, 28, 'black'))
       return
     }
   }
@@ -176,7 +203,7 @@ canvas.addEventListener('click', () => {
     numOfResources -= defenderCost
     defenders.push(new Defender(gridPositionX, gridPositionY))
   } else {
-    messages.push(new Message('资源不足', mouse.x, mouse.y, 30, 'black'))
+    messages.push(new Message('资源不足', mouse.x, mouse.y, 28, 'black'))
   }
 })
 
@@ -222,7 +249,7 @@ class Projectile {
   }
 
   draw() {
-    ctx.fillStyle = 'black'
+    ctx.fillStyle = 'green'
     ctx.beginPath()
     ctx.arc(this.x, this.y, this.width, 0, Math.PI * 2)
     ctx.fill()
@@ -236,6 +263,7 @@ function handleProjectiles() {
 
     for (let j = 0; j < enemies.length; j++) {
       if (projectiles[i] && enemies[j] && collision(projectiles[i], enemies[j])) {
+        messages.push(new Message(`-${projectiles[i].power}`, enemies[j].x + 28, enemies[j].y - 8, 20, 'red'))
         enemies[j].health -= projectiles[i].power
         projectiles.splice(i, 1)
         i--
@@ -256,30 +284,44 @@ class Enemy {
     this.y = verticalPosition
     this.width = cellSize - cellGap * 2
     this.height = cellSize - cellGap * 2
-    // this.speed = 0.4
-    this.speed = 2
+    this.speed = 0.3
     this.maxSpeed = this.speed
     this.health = 100
     this.maxHealth = this.health
     this.timer = 0
+
+    this.enemyType = enemyTypes[0]
+    this.frameX = 0
+    this.frameY = 0
+    this.minFrame = 0
+    this.maxFrame = 7
+    this.spriteWidth = 292
+    this.spriteHeight = 410
   }
 
   update() {
     this.timer++
     this.x -= this.speed;
-    if (this.timer % 500 == 0) {
+    if (this.timer % 200 == 0) {
       this.speed += 0.05
+    }
+
+    if (frame % 10 === 0) {
+      if (this.frameX < this.maxFrame) this.frameX++
+      else this.frameX = this.minFrame
     }
   }
 
   draw() {
-    ctx.strokeStyle = 'red'
-    ctx.lineWidth = 3
-    ctx.strokeRect(this.x, this.y, this.width, this.height)
+    // ctx.strokeStyle = 'red'
+    // ctx.lineWidth = 3
+    // ctx.strokeRect(this.x, this.y, this.width, this.height)
 
-    ctx.fillStyle = 'black'
-    ctx.font = '24px Orbitron'
-    ctx.fillText(Math.floor(this.health), this.x + 25, this.y + 55)
+    // ctx.fillStyle = 'black'
+    // ctx.font = '20px Orbitron'
+    // ctx.fillText(Math.floor(this.health), this.x + 32, this.y - 8)
+    ctx.drawImage(this.enemyType, this.frameX * this.spriteWidth, 0,
+      this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height)
   }
 }
 
@@ -307,7 +349,7 @@ function handleEnemies() {
     let verticalPosition = Math.floor(Math.random() * 5 + 1) * cellSize + cellGap
     enemies.push(new Enemy(verticalPosition))
     enemyPositions.push(verticalPosition)
-    if (enemiesInterval > 120) enemiesInterval -= 50
+    if (enemiesInterval > 100) enemiesInterval -= 50
   }
 }
 
@@ -365,7 +407,7 @@ function handleGameStatus() {
   }
 
   if (score >= winningScore && enemies.length === 0) {
-    ctx.fillStyle = 'black'
+    ctx.fillStyle = 'red'
     ctx.font = '300px Ma Shan Zheng'
     ctx.fillText('赢!', 280, 360)
     ctx.font = '120px Ma Shan Zheng'
