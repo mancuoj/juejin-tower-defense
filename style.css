@@ -1,7 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Orbitron:wght@500&display=swap');
+* {
+  margin: 0;
+  padding: 0; 
+}
 
 body {
   background: black;
+  font-family: 'Orbitron', 'Ma Shan Zheng', sans-serif;
 }
 
 #canvas {
@@ -12,5 +16,34 @@ body {
   transform: translate(-50%, -50%);
   width: 900px;
   height: 600px;
-  font-family: 'Orbitron', 'Ma Shan Zheng', sans-serif;
+  visibility: hidden;
+}
+
+button {
+  margin: 10px;
+  background: white;
+  width: 300px;
+  height: 80px;
+  font-size: 20px;
+  border-radius: 15px;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background: rgb(51, 204, 13);
+}
+
+#start_btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#again_btn {
+  visibility: hidden;
+  position: absolute;
+  top: 5%;
+  left: 35%;
 }

@@ -1,6 +1,7 @@
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
-
+const start_btn = document.getElementById('start_btn')
+const again_btn = document.getElementById('again_btn')
 
 // 全局变量
 canvas.width = 900
@@ -193,7 +194,7 @@ canvas.addEventListener('click', () => {
 
   for (let i = 0; i < defenders.length; i++) {
     if (defenders[i].x === gridPositionX && defenders[i].y === gridPositionY) {
-      messages.push(new Message('不能重叠', mouse.x, mouse.y, 28, 'black'))
+      messages.push(new Message('不能重叠', mouse.x, mouse.y, 28, 'red'))
       return
     }
   }
@@ -203,7 +204,7 @@ canvas.addEventListener('click', () => {
     numOfResources -= defenderCost
     defenders.push(new Defender(gridPositionX, gridPositionY))
   } else {
-    messages.push(new Message('资源不足', mouse.x, mouse.y, 28, 'black'))
+    messages.push(new Message('资源不足', mouse.x, mouse.y, 28, 'red'))
   }
 })
 
@@ -404,6 +405,7 @@ function handleGameStatus() {
     ctx.fillStyle = 'red'
     ctx.font = '300px Ma Shan Zheng'
     ctx.fillText('寄!', 280, 370)
+    again_btn.style.visibility = "visible";
   }
 
   if (score >= winningScore && enemies.length === 0) {
@@ -412,6 +414,7 @@ function handleGameStatus() {
     ctx.fillText('赢!', 280, 360)
     ctx.font = '120px Ma Shan Zheng'
     ctx.fillText(`得分: ${score}`, 250, 520)
+    again_btn.style.visibility = "visible";
   }
 }
 
@@ -446,7 +449,20 @@ function animate() {
   frame++
   if (!gameOver) requestAnimationFrame(animate)
 }
-animate()
+
+start_btn.addEventListener('click', () => {
+  start_btn.style.visibility = "hidden";
+  startGame()
+})
+
+again_btn.addEventListener('click', () => {
+  window.location.reload()
+})
+
+function startGame() {
+  canvas.style.visibility = "visible"
+  animate()
+}
 
 
 
