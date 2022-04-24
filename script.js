@@ -1,19 +1,20 @@
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
 
+
+// 全局变量
 canvas.width = 900
 canvas.height = 600
 
-// 全局变量
 const cellSize = 100
 const cellGap = 3
 const winningScore = 1000
 
 const gameGrid = []
 const defenders = []
+const projectiles = []
 const enemies = []
 const enemyPositions = []
-const projectiles = []
 const resources = []
 
 let numOfResources = 300
@@ -21,7 +22,6 @@ let score = 0
 let frame = 0
 let enemiesInterval = 600
 let gameOver = false
-
 
 
 // 记录鼠标位置
@@ -116,7 +116,7 @@ class Defender {
   }
 }
 
-canvas.addEventListener('click', (e) => {
+canvas.addEventListener('click', () => {
   const gridPositionX = mouse.x - (mouse.x % cellSize) + cellGap
   const gridPositionY = mouse.y - (mouse.y % cellSize) + cellGap
   if (gridPositionY < cellSize) return;
